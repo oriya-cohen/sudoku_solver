@@ -1,2 +1,5 @@
-# sudoku_solver
-get image - identify sudoku - get numbers and locations - solve the sudoku
+# sudoku-solver
+
+in this repo im learning github and using it to make a python based soduko-solver
+
+ * (this is an edit)
