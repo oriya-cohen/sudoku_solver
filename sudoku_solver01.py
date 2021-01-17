@@ -95,6 +95,29 @@ def boxed_frame(big_img, size_sub_window_0to1):
     return sq_marked_img, sub_img
 
 
+def line_dist(line1, line2):
+    pass
+
+
+def line_theta(line):
+    return math.atan(   (line[0][3] - line[0][1]) / (line[0][2] - line[0][0])   )
+
+
+def unite_lines(lines):
+    try:
+        # sort by cos(theta) of the line
+        united_lns = sorted(lines,
+                            key=lambda line: math.cos(line_theta(line)) )
+        grouped_lines = united_lns                                            ### edit this ###
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            frame_to_edit = cv2.line(frame_to_edit, (x1, y1), (x2, y2), (255, 0, 0), 2)
+        lines = grouped_lines
+    except:
+        print('nan found')
+    return lines
+
+
 def edit_frame(frame_to_edit):
 
     gray = cv2.cvtColor(frame_to_edit, cv2.COLOR_BGR2GRAY)  # gray color
@@ -110,13 +133,17 @@ def edit_frame(frame_to_edit):
     # find contours
     ret, thresh = cv2.threshold(frame_egdes, 127, 255, 0)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    frame_egdes = cv2.drawContours(frame_egdes, contours, -1, (255, 255, 255), 5)
+    frame_egdes = cv2.drawContours(frame_egdes, contours, -1, (255, 255, 255), 6)
+    cv2.imshow('frame_egdes', frame_egdes)
 
     # find lines
     minLineLength = 100
     maxLineGap = 100
-    lines = cv2.HoughLinesP(frame_egdes, 1, np.pi / 180, 20, minLineLength, maxLineGap)
+    # lines = cv2.HoughLinesP(frame_egdes, 1, np.pi / 180, 20, minLineLength, maxLineGap)
+    lines = cv2.HoughLinesP(frame_egdes, 1, 5 * np.pi / 180, 20, minLineLength, maxLineGap)
 
+    # unite lines
+    # lines = unite_lines(lines)
     try:
         for line in lines:
             x1, y1, x2, y2 = line[0]
