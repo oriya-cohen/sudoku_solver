@@ -3,6 +3,23 @@ import numpy as np
 import math
 
 
+def find_num(img):
+    cropped_image = [0]
+    height, width = img.shape
+
+    num_edges = cv2.Canny(img, 50, 80)  # edges
+    ret, thresh = cv2.threshold(num_edges, 127, 255, 0)
+    contours, hierarchy = \
+        cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
+    for cntr in contours:
+        x, y, w, h = cv2.boundingRect(cntr)  # This will find out co-ord for plate
+        if 0.1 * width <= w <= 0.95 * width and 0.3 * height <= h <= 0.8 * height:
+            cropped_image = img[y:y + h, x:x + w]  # Create new image
+
+            break
+
+    return cropped_image
+
 def get_numbers_in_fig(new_img, size=9):
     x_len, y_len = new_img.shape
 
@@ -10,16 +27,20 @@ def get_numbers_in_fig(new_img, size=9):
     x_mini = x_len // size
     y_mini = y_len // size
 
-    sud_array = np.empty((size, size))
+    # sud_array = np.empty((size, size,1))
+    sud_array = [[0] * size for i in range(size)]
 
     # create array of figures
     for c in range(size):
         for r in range(size):
-            sud_array = new_img[x_mini * r: x_mini * (r + 1), y_mini * c: y_mini * (c + 1)]
+            sud_array[r][c] = new_img[x_mini * r: x_mini * (r + 1), y_mini * c: y_mini * (c + 1)]
+            sud_array[r][c] = find_num(sud_array[r][c])
 
             # test
-            if r == 0 and c == 2:
-                cv2.imshow('is it 8?', sud_array)
+
+            if len(sud_array[r][c]) != 1:
+                cv2.imshow('is it a number?', sud_array[r][c])
+                cv2.waitKey(1000)
 
     return sud_array
 
@@ -79,9 +100,16 @@ def four_point_transform(image, pts):
     # compute the perspective transform matrix and then apply it
     M = cv2.getPerspectiveTransform(rect, dst)
     warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
+    try:
+        transverse = np.linalg.inv(M)
+        if True:
+            pass   # check trans did good
+    except:
+        transverse = -1
+
     # return the warped image
     # and the transverse coordinate transform
-    transverse = np.linalg.inv(M)
+
     return warped, transverse
 
 
@@ -161,9 +189,9 @@ def boxed_frame(big_img, size_sub_window_0to1):
     points = [pt for pt in zip(x_idx, y_idx)]
 
     # plot ROI on image
-    line_width = 1
+    line_width = 5
     sq_marked_img = big_img
-    sq_marked_img = cv2.rectangle(sq_marked_img, points[0], points[2], (100, 100, 100), line_width)
+    sq_marked_img = cv2.rectangle(sq_marked_img, points[0], points[2], (200, 50, 200), line_width)
 
     # drew that way but there is a shelf code for it
     # for k in range(len(points)):
@@ -208,15 +236,18 @@ def edit_frame(frame_to_edit):
     spots_cleared_frame = clear_image_spots(gray)  # clear image spots
     cv2.imshow('cleared_frame', spots_cleared_frame)
     # find edges
-    frame_egdes = cv2.Canny(spots_cleared_frame, 50, 80)
-    cv2.imshow('frame_egdes', frame_egdes)
+    frame_edges = cv2.Canny(spots_cleared_frame, 50, 80)
+    # cv2.imshow('frame_edges', frame_edges)
 
     # find contours
-    ret, thresh = cv2.threshold(frame_egdes, 127, 255, 0)
+    ret, thresh = cv2.threshold(frame_edges, 127, 255, 0)
     # contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    contours, hierarchy = cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # only the external contour
-    frame_egdes = cv2.drawContours(frame_egdes, contours, -1, (255, 255, 255), 6)
-    cv2.imshow('frame_egdes', frame_egdes)
+    contours, hierarchy = \
+        cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
+
+    # show contours
+    # frame_edges = cv2.drawContours(frame_edges, contours, -1, (255, 255, 255), 6)
+    # cv2.imshow('frame_edges', frame_edges)
 
     # sort contours by area - this part is based on :
     #           https://github.com/AjayAndData/Licence-plate-detection-and-recognition---using-openCV-only
@@ -229,18 +260,21 @@ def edit_frame(frame_to_edit):
         perimeter = cv2.arcLength(cntr, True)
         approx = cv2.approxPolyDP(cntr, 0.02 * perimeter, True)
         # print ("approx = ",approx)
-        if len(approx) == 4:  # Select the contour with 4 corners
+        if len(approx) == 4 and cv2.contourArea(cntr) > 0.5 * np.size(gray):  # Select the contour with 4 corners
             NumberPlateCnt = approx  # This is our approx Number Plate Contour
 
             # Crop those contours and store it in Cropped Images folder
             # x, y, w, h = cv2.boundingRect(cntr)  # This will find out co-ord for plate
             # new_img = gray[y:y + h, x:x + w]  # Create new image
 
-            # my edition. stretching a Quadrilateral to square
-            new_img = four_point_transform(gray, pts=[approx[i][0] for i in range(4)])
+            # my edition. stretching a Quadrilateral to square and get the transverse transform
+            # new_img, transverse_trans = four_point_transform(gray, pts=[approx[i][0] for i in range(4)]) # original gray
+            new_img, transverse_trans = \
+                four_point_transform(spots_cleared_frame, pts=[approx[i][0] for i in range(4)])  # cleared image
 
-            if np.size(new_img) > 0.5 * np.size(gray):   # only for large figures display them
+            if np.size(new_img) > 0.5 * np.size(gray):  # only for large figures display them
                 cv2.imshow('Cropped Images /' + str(idx) + '.png', new_img)  # display new image
+                cv2.waitKey(0)
                 # cv2.imwrite('Cropped Images-Text/' + str(idx) + '.png', new_img)  # Store new image
                 # idx += 1
 
@@ -278,7 +312,7 @@ if __name__ == '__main__':
         cv2.imshow('feed', frame_box)
 
         edited_frame = edit_frame(sub_frame)
-        cv2.imshow('edited_frame', edited_frame)
+        # cv2.imshow('edited_frame', edited_frame)
 
     cap.release()  # release the camera
     cv2.destroyAllWindows()  # closes the current windows
