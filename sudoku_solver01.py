@@ -40,7 +40,7 @@ def get_numbers_in_fig(new_img, size=9):
 
             if len(sud_array[r][c]) != 1:
                 cv2.imshow('is it a number?', sud_array[r][c])
-                cv2.waitKey(1000)
+                cv2.waitKey(100)
 
     return sud_array
 
@@ -274,7 +274,7 @@ def edit_frame(frame_to_edit):
 
             if np.size(new_img) > 0.5 * np.size(gray):  # only for large figures display them
                 cv2.imshow('Cropped Images /' + str(idx) + '.png', new_img)  # display new image
-                cv2.waitKey(0)
+                cv2.waitKey(1000)
                 # cv2.imwrite('Cropped Images-Text/' + str(idx) + '.png', new_img)  # Store new image
                 # idx += 1
 
@@ -307,7 +307,7 @@ if __name__ == '__main__':
         ret, frame = cap.read()
         if not ret or cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        range_sub_rect = 2 / 3
+        range_sub_rect = 9 / 10
         frame_box, sub_frame = boxed_frame(frame, range_sub_rect)
         cv2.imshow('feed', frame_box)
 
