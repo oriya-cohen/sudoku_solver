@@ -42,3 +42,7 @@ model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_s
 # Final evaluation of the model
 scores = model.evaluate(X_test, y_test, verbose=0)
 print("Baseline Error: %.2f%%" % (100-scores[1]*100))
+
+model_name = 'model 1'
+model.save('D:\PyProjects\sudoku\sudoku_solver\keras_models\ ' + model_name)
+

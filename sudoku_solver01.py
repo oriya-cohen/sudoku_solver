@@ -1,46 +1,75 @@
 import cv2
 import numpy as np
 import math
+from keras.models import load_model
 
 
-def find_num(img):
-    cropped_image = [0]
+
+def predict_num(model_name, img):
     height, width = img.shape
 
-    num_edges = cv2.Canny(img, 50, 80)  # edges
-    ret, thresh = cv2.threshold(num_edges, 127, 255, 0)
+
+    model = load_model('keras_models/ ' + model_name)
+
+    X_new = [[...], [...]]
+    num_predict = model.predict_classes(Xnew)
+
+    return num_predict
+
+
+def find_num(img, filtered_img):
+    correct_size = [0]
+    height, width = img.shape
+
+    num_edges = cv2.Canny(filtered_img, 50, 80)  # edges
+    _, thresh = cv2.threshold(num_edges, 127, 255, 0)
     contours, hierarchy = \
         cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
     for cntr in contours:
         x, y, w, h = cv2.boundingRect(cntr)  # This will find out co-ord for plate
-        if 0.1 * width <= w <= 0.95 * width and 0.3 * height <= h <= 0.8 * height:
+        if 0.05 * width <= w <= 0.95 * width and 0.3 * height <= h <= 0.8 * height:
             cropped_image = img[y:y + h, x:x + w]  # Create new image
+
+            d = 28  # dimension of training data size
+            if cropped_image.shape[1] < 28 and cropped_image.shape[0] < 28:
+                correct_size = np.zeros((d, d))
+                correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] =\
+                    cv2.threshold(cropped_image, 100, 225, cv2.THRESH_BINARY_INV)[1]
+                # correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] = \
+                #     cv2.bitwise_not(cropped_image)
+            else:
+                correct_size = cv2.resize(cropped_image, (28, 28))
 
             break
 
-    return cropped_image
+    # reshape the image to 28 by 28
 
-def get_numbers_in_fig(new_img, size=9):
-    x_len, y_len = new_img.shape
+    return correct_size
+
+
+def get_numbers_in_fig(aligned_gray, aligned_cleared, size=9):
+    x_len, y_len = aligned_gray.shape
 
     # size of mini image
     x_mini = x_len // size
     y_mini = y_len // size
 
     # sud_array = np.empty((size, size,1))
-    sud_array = [[0] * size for i in range(size)]
+    sud_array        = [[0] * size for i in range(size)]
+    sud_array_filter = [[0] * size for i in range(size)]
 
     # create array of figures
     for c in range(size):
         for r in range(size):
-            sud_array[r][c] = new_img[x_mini * r: x_mini * (r + 1), y_mini * c: y_mini * (c + 1)]
-            sud_array[r][c] = find_num(sud_array[r][c])
+            sud_array_filter[r][c] = aligned_cleared[x_mini * r: x_mini * (r + 1), y_mini * c: y_mini * (c + 1)]
+            sud_array[r][c] = aligned_gray[x_mini * r: x_mini * (r + 1), y_mini * c: y_mini * (c + 1)]
+            sud_array[r][c] = find_num(sud_array[r][c], sud_array_filter[r][c])
 
             # test
 
             if len(sud_array[r][c]) != 1:
                 cv2.imshow('is it a number?', sud_array[r][c])
-                cv2.waitKey(100)
+                cv2.waitKey(500)
 
     return sud_array
 
@@ -268,18 +297,20 @@ def edit_frame(frame_to_edit):
             # new_img = gray[y:y + h, x:x + w]  # Create new image
 
             # my edition. stretching a Quadrilateral to square and get the transverse transform
-            # new_img, transverse_trans = four_point_transform(gray, pts=[approx[i][0] for i in range(4)]) # original gray
-            new_img, transverse_trans = \
-                four_point_transform(spots_cleared_frame, pts=[approx[i][0] for i in range(4)])  # cleared image
+            aligned_gray_img, transverse_trans = \
+                four_point_transform(gray, pts=[approx[i][0] for i in range(4)])  # cleared image
 
-            if np.size(new_img) > 0.5 * np.size(gray):  # only for large figures display them
-                cv2.imshow('Cropped Images /' + str(idx) + '.png', new_img)  # display new image
+            aligned_cleared_img, _ = \
+                four_point_transform(spots_cleared_frame, pts=[approx[i][0] for i in range(4)])
+
+            if np.size(aligned_gray_img) > 0.5 * np.size(gray):  # only for large figures display them
+                cv2.imshow('Cropped Images /' + str(idx) + '.png', aligned_gray_img)  # display new image
                 cv2.waitKey(1000)
                 # cv2.imwrite('Cropped Images-Text/' + str(idx) + '.png', new_img)  # Store new image
                 # idx += 1
 
                 # pass the image to image recognition solver
-                soduko_arr = get_numbers_in_fig(new_img)
+                soduko_arr = get_numbers_in_fig(aligned_gray_img,aligned_cleared_img)
             break
 
     # find lines

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7fdfba85-de13-4b18-94e9-6e9ee520c4c7" name="Default Changelist" comment="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train">
+    <list default="true" id="7fdfba85-de13-4b18-94e9-6e9ee520c4c7" name="Default Changelist" comment="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sudoku_solver01.py" beforeDir="false" afterPath="$PROJECT_DIR$/sudoku_solver01.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_digit_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_digit_model.py" afterDir="false" />
@@ -44,7 +44,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
   </component>
-  <component name="RunManager" selected="Python.train_digit_model">
+  <component name="RunManager" selected="Python.sudoku_solver01">
     <configuration name="sudoku_solver" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="sudoku_solver" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -131,8 +131,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.train_digit_model" />
         <item itemvalue="Python.sudoku_solver01" />
+        <item itemvalue="Python.train_digit_model" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.sudoku_solver" />
       </list>
@@ -175,7 +175,14 @@
       <option name="project" value="LOCAL" />
       <updated>1610963511616</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers">
+      <created>1610970701067</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1610970701067</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -195,30 +202,26 @@
     <MESSAGE value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -&gt; HoughLinesP -&gt; still need to unite the lines -" />
     <MESSAGE value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers" />
     <MESSAGE value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train" />
-    <option name="LAST_COMMIT_MESSAGE" value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train" />
+    <MESSAGE value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers" />
+    <option name="LAST_COMMIT_MESSAGE" value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>169</line>
+          <line>198</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>281</line>
-          <option name="timeStamp" value="45" />
+          <url>file://$PROJECT_DIR$/train_digit_model.py</url>
+          <line>14</line>
+          <option name="timeStamp" value="51" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>7</line>
-          <option name="timeStamp" value="47" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>41</line>
-          <option name="timeStamp" value="49" />
+          <line>20</line>
+          <option name="timeStamp" value="58" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
