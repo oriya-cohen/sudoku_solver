@@ -1,24 +1,56 @@
+from __future__ import print_function
 import cv2
 import numpy as np
 import math
-from keras.models import load_model
+import torch
+from pytorch_mnist import mnist
+import pytesseract
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torchvision import datasets, transforms
+from torch.optim.lr_scheduler import StepLR
 
 
+def load_model(checkpoint_fpath, model):
+    """
+    checkpoint_path: path to save checkpoint
+    model: model that we want to load checkpoint parameters into
+    optimizer: optimizer we defined in previous training
+    """
+    # load check point
+    checkpoint = torch.load(checkpoint_fpath)
+    # initialize state_dict from checkpoint to model
+    model.load_state_dict(checkpoint)
+    # return model, optimizer, epoch value, min validation loss
+    return model
 
-def predict_num(model_name, img):
+
+def predict_num(img):
     height, width = img.shape
 
+    # model = keras.models.load_model('D:\PyProjects\sudoku\sudoku_solver\keras_models\ model 1')
+    num_pixels = img.shape[1] * img.shape[0]
+    #
+    x_vec = img.reshape((1, num_pixels)).astype('float32')
+    x_vec = (255 - x_vec) # letter in white
+    x_vec = ( x_vec - np.mean(x_vec)) / np.var(x_vec)
+    x_vec = x_vec.reshape((1,1,height, width)).astype('float32')
 
-    model = load_model('keras_models/ ' + model_name)
+    x_vec_tensor = torch.from_numpy(x_vec)
+    num_predict = model(x_vec_tensor)
+    predict = 0
+    if (np.max(num_predict) >= 0.6):
+        text = pytesseract.image_to_string(img, lang='eng')
 
-    X_new = [[...], [...]]
-    num_predict = model.predict_classes(Xnew)
-
-    return num_predict
+        predict = np.argmax(num_predict) + 1
+        predict = text
+        cv2.imshow('number ' + str(predict), img)
+    return predict
 
 
 def find_num(img, filtered_img):
-    correct_size = [0]
+    predicted_num = [0]
     height, width = img.shape
 
     num_edges = cv2.Canny(filtered_img, 50, 80)  # edges
@@ -27,25 +59,43 @@ def find_num(img, filtered_img):
         cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
     for cntr in contours:
         x, y, w, h = cv2.boundingRect(cntr)  # This will find out co-ord for plate
-        if 0.05 * width <= w <= 0.95 * width and 0.3 * height <= h <= 0.8 * height:
-            cropped_image = img[y:y + h, x:x + w]  # Create new image
+        (cX, cY) = find_cent_cntr(cntr)
+        if cX == -1 or cY == -1:
+            break
+        cropped_image = img[cY-14:cY+14, cX-14:cX+14]
 
+        if 0.05 * width <= w <= 0.95 * width and 0.3 * height <= h <= 0.8 * height:
+            # cropped_image = img[y:y + h, x:x + w]  # Create new image
+            cropped_image = img[cY - 14:cY + 14, cX - 14:cX + 14]
+            cv2.imshow('cropped image', cropped_image)
+            cv2.waitKey(1)
             d = 28  # dimension of training data size
-            if cropped_image.shape[1] < 28 and cropped_image.shape[0] < 28:
+            if cropped_image.shape[1] < d and cropped_image.shape[0] < d:
                 correct_size = np.zeros((d, d))
                 correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] =\
                     cv2.threshold(cropped_image, 100, 225, cv2.THRESH_BINARY_INV)[1]
                 # correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] = \
                 #     cv2.bitwise_not(cropped_image)
+                predicted_num = predict_num(correct_size)
             else:
                 correct_size = cv2.resize(cropped_image, (28, 28))
-
+                predicted_num = predict_num(correct_size)
             break
 
     # reshape the image to 28 by 28
 
-    return correct_size
 
+    return predicted_num
+
+
+def find_cent_cntr(cntr):
+    # compute the center of the contour
+    M = cv2.moments(cntr)
+    if M["m00"] == 0:
+        return -1, -1
+    cX = int(M["m10"] / M["m00"]) # got this error: (float division by zero) ... !!!!!!!!!!!!!!!!!!!!!
+    cY = int(M["m01"] / M["m00"])
+    return cX, cY
 
 def get_numbers_in_fig(aligned_gray, aligned_cleared, size=9):
     x_len, y_len = aligned_gray.shape
@@ -67,7 +117,7 @@ def get_numbers_in_fig(aligned_gray, aligned_cleared, size=9):
 
             # test
 
-            if len(sud_array[r][c]) != 1:
+            if type(sud_array[r][c]) == 'numpy.int64' :
                 cv2.imshow('is it a number?', sud_array[r][c])
                 cv2.waitKey(500)
 
@@ -289,6 +339,11 @@ def edit_frame(frame_to_edit):
         perimeter = cv2.arcLength(cntr, True)
         approx = cv2.approxPolyDP(cntr, 0.02 * perimeter, True)
         # print ("approx = ",approx)
+
+        # cnt_image = frame_to_edit.copy()
+        # cnt_image = cv2.drawContours(cnt_image, contours, -1, (255, 255, 255), 6)
+        # cv2.imshow('cnt_image', cnt_image)
+
         if len(approx) == 4 and cv2.contourArea(cntr) > 0.5 * np.size(gray):  # Select the contour with 4 corners
             NumberPlateCnt = approx  # This is our approx Number Plate Contour
 
@@ -334,6 +389,12 @@ def edit_frame(frame_to_edit):
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
+    # load model
+    model = mnist.Net()
+    checkpoint_fpath = "pytorch_mnist/mnist_cnn.pt"
+    model = load_model(checkpoint_fpath, model)
+
+    # display cam-feed
     while True:
         ret, frame = cap.read()
         if not ret or cv2.waitKey(1) & 0xFF == ord('q'):

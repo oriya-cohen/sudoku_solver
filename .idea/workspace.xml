@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7fdfba85-de13-4b18-94e9-6e9ee520c4c7" name="Default Changelist" comment="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers">
+    <list default="true" id="7fdfba85-de13-4b18-94e9-6e9ee520c4c7" name="Default Changelist" comment="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers&#10;&#10;added a basic decision model">
+      <change afterPath="$PROJECT_DIR$/pytorch_mnist/mnist.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pytorch_mnist/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tesseract/tesseract_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sudoku_solver01.py" beforeDir="false" afterPath="$PROJECT_DIR$/sudoku_solver01.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_digit_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_digit_model.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,9 +45,17 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+  </component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings>
+        <option name="useSoftWraps" value="true" />
+      </console-settings>
+    </option>
   </component>
   <component name="RunManager" selected="Python.sudoku_solver01">
-    <configuration name="sudoku_solver" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="mnist" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="sudoku_solver" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -53,11 +63,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/pytorch_mnist" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sudoku_solver.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pytorch_mnist/mnist.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -87,7 +97,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="tesseract_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="sudoku_solver" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -95,11 +105,32 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tesseract" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tesseract/tesseract_test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tests" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="sudoku_solver" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="C:/python/python3.7.7/Lib/site-packages/tesseract" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="C:/python/python3.7.7/Lib/site-packages/tesseract/tests.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -132,9 +163,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.sudoku_solver01" />
+        <item itemvalue="Python.tesseract_test" />
+        <item itemvalue="Python.tests" />
+        <item itemvalue="Python.mnist" />
         <item itemvalue="Python.train_digit_model" />
-        <item itemvalue="Python.test" />
-        <item itemvalue="Python.sudoku_solver" />
       </list>
     </recent_temporary>
   </component>
@@ -182,7 +214,14 @@
       <option name="project" value="LOCAL" />
       <updated>1610970701067</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers&#10;&#10;added a basic decision model">
+      <created>1610992647287</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1610992647287</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -203,14 +242,15 @@
     <MESSAGE value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers" />
     <MESSAGE value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train" />
     <MESSAGE value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers" />
-    <option name="LAST_COMMIT_MESSAGE" value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers" />
+    <MESSAGE value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers&#10;&#10;added a basic decision model" />
+    <option name="LAST_COMMIT_MESSAGE" value="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers&#10;&#10;added a basic decision model" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>198</line>
+          <line>248</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -220,8 +260,28 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>20</line>
-          <option name="timeStamp" value="58" />
+          <line>42</line>
+          <option name="timeStamp" value="61" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
+          <line>36</line>
+          <option name="timeStamp" value="72" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/pytorch_mnist/mnist.py</url>
+          <line>122</line>
+          <option name="timeStamp" value="76" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/pytorch_mnist/mnist.py</url>
+          <line>39</line>
+          <option name="timeStamp" value="80" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
+          <line>41</line>
+          <option name="timeStamp" value="81" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
