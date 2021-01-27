@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
+import load5example as exm
 
 
 def load_model(checkpoint_fpath, model):
@@ -34,13 +35,16 @@ def predict_num(img):
     #
     x_vec = img.reshape((1, num_pixels)).astype('float32')
     x_vec = (255 - x_vec)  # letter in white
-    x_vec = (x_vec - np.mean(x_vec)) / np.var(x_vec)
+    x_vec = (x_vec - np.mean(x_vec)) / np.std(x_vec)
     x_vec = x_vec.reshape((1, 1, height, width)).astype('float32')
+
+    example5 = exm.load5example()
+    data5 = example5[0]
 
     x_vec_tensor = torch.from_numpy(x_vec)
     output = model(x_vec_tensor)
-    predict = pred = output.argmax(dim=1, keepdim=True)
-    print(predict[0][0])
+    predict = output.argmax(dim=1, keepdim=True)[0][0]
+    print(predict)
 
     # trying to find output by pytesseract didn't work
     # if (np.max(output) >= 0.6):
@@ -49,11 +53,11 @@ def predict_num(img):
     #     predict = np.argmax(num_predict) + 1
     #     predict = text
     #     cv2.imshow('number ' + str(predict), img)
-    return predict.numpy()[0][0]
+    return predict.numpy().tolist()
 
 
 def find_num(img, filtered_img):
-    predicted_num = [-1]
+    predicted_num = -1
     height, width = img.shape
 
     num_edges = cv2.Canny(filtered_img, 50, 80)  # edges
@@ -81,7 +85,7 @@ def find_num(img, filtered_img):
             correct_size = cv2.resize(cropped_image, (28, 28))
             cropped_image = cv2.drawContours(cropped_image, cntr, 0, (0, 255, 0), 1)
             cv2.imshow('cropped image', cropped_image)
-            cv2.waitKey(500)
+            cv2.waitKey(40)
 
 
             # d = 28  # dimension of training data size
@@ -101,16 +105,6 @@ def find_num(img, filtered_img):
     # reshape the image to 28 by 28
 
     return predicted_num
-
-
-def find_cent_cntr(cntr):
-    # compute the center of the contour
-    M = cv2.moments(cntr)
-    if M["m00"] == 0:
-        return -1, -1
-    cX = int(M["m10"] / M["m00"])  # got this error: (float division by zero) ... !!!!!!!!!!!!!!!!!!!!!
-    cY = int(M["m01"] / M["m00"])
-    return cX, cY
 
 
 def get_numbers_in_fig(aligned_gray, aligned_cleared, size=9):
@@ -300,32 +294,9 @@ def boxed_frame(big_img, size_sub_window_0to1):
     return sq_marked_img, sub_img
 
 
-def line_dist(line1, line2):
-    pass
-
-
-def line_theta(line):
-    return math.atan((line[0][3] - line[0][1]) / (line[0][2] - line[0][0]))
-
-
-def unite_lines(lines):
-    try:
-        # sort by cos(theta) of the line
-        united_lns = sorted(lines,
-                            key=lambda line: math.cos(line_theta(line)))
-        grouped_lines = united_lns  ### edit this ###
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            frame_to_edit = cv2.line(frame_to_edit, (x1, y1), (x2, y2), (255, 0, 0), 2)
-        lines = grouped_lines
-    except:
-        print('nan found')
-    return lines
-
-
-def edit_frame(frame_to_edit):
+def find_sud_in_frame(frame_to_edit):
     gray = cv2.cvtColor(frame_to_edit, cv2.COLOR_BGR2GRAY)  # gray color
-
+    soduko_arr = 0
     # (thresh, frame_to_edit) = cv2.threshold(frame_to_edit, 127, 255, cv2.THRESH_BINARY)   # black and white img
 
     spots_cleared_frame = clear_image_spots(gray)  # clear image spots
@@ -399,7 +370,7 @@ def edit_frame(frame_to_edit):
     # except:
     #     print('nan found')
 
-    return frame_to_edit
+    return frame_to_edit, soduko_arr
 
 
 if __name__ == '__main__':
@@ -413,12 +384,14 @@ if __name__ == '__main__':
     image_path = "pics/img_003.jpg"
     image = cv2.imread(image_path)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    cv2.imshow('demo', gray)
-    cv2.waitKey(1)
+    # cv2.imshow('demo', gray)
+    # cv2.waitKey(1)
     sub_frame = image
-    edited_frame = edit_frame(sub_frame)
-    cv2.imshow('demo_edit', edited_frame)
+    edited_frame, sud_arr = find_sud_in_frame(sub_frame)
+    print(np.array(sud_arr))
+    cv2.imshow('resized sud', cv2.resize(edited_frame, (500, 500)))
     cv2.waitKey(0)
+
 
     # display cam-feed
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
@@ -430,7 +403,7 @@ if __name__ == '__main__':
         frame_box, sub_frame = boxed_frame(frame, range_sub_rect)
         cv2.imshow('feed', frame_box)
 
-        edited_frame = edit_frame(sub_frame)
+        edited_frame, sud_arr = find_sud_in_frame(sub_frame)
         # cv2.imshow('edited_frame', edited_frame)
 
     cap.release()  # release the camera

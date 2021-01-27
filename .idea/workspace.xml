@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7fdfba85-de13-4b18-94e9-6e9ee520c4c7" name="Default Changelist" comment="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers&#10;&#10;added a basic decision model">
+      <change afterPath="$PROJECT_DIR$/load5example.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sudoku_solver01.py" beforeDir="false" afterPath="$PROJECT_DIR$/sudoku_solver01.py" afterDir="false" />
     </list>
@@ -52,6 +53,27 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.sudoku_solver01">
+    <configuration name="load5example" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="sudoku_solver" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/load5example.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="mnist" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="sudoku_solver" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -136,34 +158,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_digit_model" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="sudoku_solver" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_digit_model.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.sudoku_solver01" />
+        <item itemvalue="Python.load5example" />
+        <item itemvalue="Python.mnist" />
         <item itemvalue="Python.tesseract_test" />
         <item itemvalue="Python.tests" />
-        <item itemvalue="Python.mnist" />
-        <item itemvalue="Python.train_digit_model" />
       </list>
     </recent_temporary>
   </component>
@@ -232,7 +233,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611771299309</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers&#10;&#10;added a basic decision model">
+      <created>1611773535909</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1611773535909</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -261,7 +269,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>264</line>
+          <line>258</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -281,15 +289,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>423</line>
+          <line>396</line>
           <option name="timeStamp" value="83" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>97</line>
-          <option name="timeStamp" value="86" />
+          <url>file://$PROJECT_DIR$/pytorch_mnist/mnist.py</url>
+          <line>62</line>
+          <option name="timeStamp" value="87" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="img" />
+        <watch expression="img" />
+        <watch expression="img" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
