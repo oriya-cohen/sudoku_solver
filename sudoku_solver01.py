@@ -33,24 +33,27 @@ def predict_num(img):
     num_pixels = img.shape[1] * img.shape[0]
     #
     x_vec = img.reshape((1, num_pixels)).astype('float32')
-    x_vec = (255 - x_vec) # letter in white
-    x_vec = ( x_vec - np.mean(x_vec)) / np.var(x_vec)
-    x_vec = x_vec.reshape((1,1,height, width)).astype('float32')
+    x_vec = (255 - x_vec)  # letter in white
+    x_vec = (x_vec - np.mean(x_vec)) / np.var(x_vec)
+    x_vec = x_vec.reshape((1, 1, height, width)).astype('float32')
 
     x_vec_tensor = torch.from_numpy(x_vec)
-    num_predict = model(x_vec_tensor)
-    predict = 0
-    if (np.max(num_predict) >= 0.6):
-        text = pytesseract.image_to_string(img, lang='eng')
+    output = model(x_vec_tensor)
+    predict = pred = output.argmax(dim=1, keepdim=True)
+    print(predict[0][0])
 
-        predict = np.argmax(num_predict) + 1
-        predict = text
-        cv2.imshow('number ' + str(predict), img)
-    return predict
+    # trying to find output by pytesseract didn't work
+    # if (np.max(output) >= 0.6):
+    #     text = pytesseract.image_to_string(img, lang='eng')
+    #
+    #     predict = np.argmax(num_predict) + 1
+    #     predict = text
+    #     cv2.imshow('number ' + str(predict), img)
+    return predict.numpy()[0][0]
 
 
 def find_num(img, filtered_img):
-    predicted_num = [0]
+    predicted_num = [-1]
     height, width = img.shape
 
     num_edges = cv2.Canny(filtered_img, 50, 80)  # edges
@@ -59,31 +62,43 @@ def find_num(img, filtered_img):
         cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
     for cntr in contours:
         x, y, w, h = cv2.boundingRect(cntr)  # This will find out co-ord for plate
-        (cX, cY) = find_cent_cntr(cntr)
-        if cX == -1 or cY == -1:
-            break
-        cropped_image = img[cY-14:cY+14, cX-14:cX+14]
+        (cX, cY) = x + w // 2, y + h // 2
 
-        if 0.05 * width <= w <= 0.95 * width and 0.3 * height <= h <= 0.8 * height:
+        # (cX, cY) = find_cent_cntr(cntr)
+        # if cX == -1 or cY == -1:
+        #     break
+
+        if (0.05 * width <= w <= 0.95 * width) and (0.3 * height <= h <= 0.8 * height):
             # cropped_image = img[y:y + h, x:x + w]  # Create new image
-            cropped_image = img[cY - 14:cY + 14, cX - 14:cX + 14]
+            max_dim = max([w, h])
+            ratio = (5 / 4)
+            x_left = max(0, math.ceil(cX - ratio * max_dim // 2))
+            x_right = min(width, math.floor(cX + ratio * max_dim // 2))
+            y_up = max(0, math.ceil(cY - ratio * max_dim // 2))
+            y_down = min(width, math.floor(cY + ratio * max_dim // 2))
+
+            cropped_image = img[x_left:x_right, y_up:y_down]
+            correct_size = cv2.resize(cropped_image, (28, 28))
+            cropped_image = cv2.drawContours(cropped_image, cntr, 0, (0, 255, 0), 1)
             cv2.imshow('cropped image', cropped_image)
-            cv2.waitKey(1)
-            d = 28  # dimension of training data size
-            if cropped_image.shape[1] < d and cropped_image.shape[0] < d:
-                correct_size = np.zeros((d, d))
-                correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] =\
-                    cv2.threshold(cropped_image, 100, 225, cv2.THRESH_BINARY_INV)[1]
-                # correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] = \
-                #     cv2.bitwise_not(cropped_image)
-                predicted_num = predict_num(correct_size)
-            else:
-                correct_size = cv2.resize(cropped_image, (28, 28))
-                predicted_num = predict_num(correct_size)
+            cv2.waitKey(500)
+
+
+            # d = 28  # dimension of training data size
+            # if cropped_image.shape[1] < d and cropped_image.shape[0] < d:
+            #     correct_size = np.zeros((d, d))
+            #     correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] = \
+            #         cv2.threshold(cropped_image, 100, 225, cv2.THRESH_BINARY_INV)[1]
+            #     # correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] = \
+            #     #     cv2.bitwise_not(cropped_image)
+            #     predicted_num = predict_num(correct_size)
+            # else:
+            #     correct_size = cv2.resize(cropped_image, (28, 28))
+
+            predicted_num = predict_num(correct_size)
             break
 
     # reshape the image to 28 by 28
-
 
     return predicted_num
 
@@ -93,9 +108,10 @@ def find_cent_cntr(cntr):
     M = cv2.moments(cntr)
     if M["m00"] == 0:
         return -1, -1
-    cX = int(M["m10"] / M["m00"]) # got this error: (float division by zero) ... !!!!!!!!!!!!!!!!!!!!!
+    cX = int(M["m10"] / M["m00"])  # got this error: (float division by zero) ... !!!!!!!!!!!!!!!!!!!!!
     cY = int(M["m01"] / M["m00"])
     return cX, cY
+
 
 def get_numbers_in_fig(aligned_gray, aligned_cleared, size=9):
     x_len, y_len = aligned_gray.shape
@@ -105,7 +121,7 @@ def get_numbers_in_fig(aligned_gray, aligned_cleared, size=9):
     y_mini = y_len // size
 
     # sud_array = np.empty((size, size,1))
-    sud_array        = [[0] * size for i in range(size)]
+    sud_array = [[0] * size for i in range(size)]
     sud_array_filter = [[0] * size for i in range(size)]
 
     # create array of figures
@@ -117,7 +133,7 @@ def get_numbers_in_fig(aligned_gray, aligned_cleared, size=9):
 
             # test
 
-            if type(sud_array[r][c]) == 'numpy.int64' :
+            if type(sud_array[r][c]) == 'numpy.int64':
                 cv2.imshow('is it a number?', sud_array[r][c])
                 cv2.waitKey(500)
 
@@ -182,7 +198,7 @@ def four_point_transform(image, pts):
     try:
         transverse = np.linalg.inv(M)
         if True:
-            pass   # check trans did good
+            pass  # check trans did good
     except:
         transverse = -1
 
@@ -365,7 +381,7 @@ def edit_frame(frame_to_edit):
                 # idx += 1
 
                 # pass the image to image recognition solver
-                soduko_arr = get_numbers_in_fig(aligned_gray_img,aligned_cleared_img)
+                soduko_arr = get_numbers_in_fig(aligned_gray_img, aligned_cleared_img)
             break
 
     # find lines
@@ -387,14 +403,25 @@ def edit_frame(frame_to_edit):
 
 
 if __name__ == '__main__':
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
     # load model
     model = mnist.Net()
     checkpoint_fpath = "pytorch_mnist/mnist_cnn.pt"
     model = load_model(checkpoint_fpath, model)
 
+    # load demi picture
+    image_path = "pics/img_003.jpg"
+    image = cv2.imread(image_path)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('demo', gray)
+    cv2.waitKey(1)
+    sub_frame = image
+    edited_frame = edit_frame(sub_frame)
+    cv2.imshow('demo_edit', edited_frame)
+    cv2.waitKey(0)
+
     # display cam-feed
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     while True:
         ret, frame = cap.read()
         if not ret or cv2.waitKey(1) & 0xFF == ord('q'):
