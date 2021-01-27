@@ -4,12 +4,6 @@ import numpy as np
 import math
 import torch
 from pytorch_mnist import mnist
-import pytesseract
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.optim.lr_scheduler import StepLR
 import load5example as exm
 
 
@@ -300,7 +294,7 @@ def find_sud_in_frame(frame_to_edit):
     # (thresh, frame_to_edit) = cv2.threshold(frame_to_edit, 127, 255, cv2.THRESH_BINARY)   # black and white img
 
     spots_cleared_frame = clear_image_spots(gray)  # clear image spots
-    cv2.imshow('cleared_frame', spots_cleared_frame)
+    cv2.imshow('cleared_frame', cv2.resize(spots_cleared_frame, (300, 300)))
     # find edges
     frame_edges = cv2.Canny(spots_cleared_frame, 50, 80)
     # cv2.imshow('frame_edges', frame_edges)
@@ -345,9 +339,11 @@ def find_sud_in_frame(frame_to_edit):
             aligned_cleared_img, _ = \
                 four_point_transform(spots_cleared_frame, pts=[approx[i][0] for i in range(4)])
 
+            cv2.imshow('sud_aligned', cv2.resize(aligned_gray_img, (400, 400)))
+
             if np.size(aligned_gray_img) > 0.5 * np.size(gray):  # only for large figures display them
-                cv2.imshow('Cropped Images /' + str(idx) + '.png', aligned_gray_img)  # display new image
-                cv2.waitKey(1000)
+                # cv2.imshow('Cropped Images /' + str(idx) + '.png', aligned_gray_img)  # display new image
+                # cv2.waitKey(1000)
                 # cv2.imwrite('Cropped Images-Text/' + str(idx) + '.png', new_img)  # Store new image
                 # idx += 1
 
@@ -389,7 +385,7 @@ if __name__ == '__main__':
     sub_frame = image
     edited_frame, sud_arr = find_sud_in_frame(sub_frame)
     print(np.array(sud_arr))
-    cv2.imshow('resized sud', cv2.resize(edited_frame, (500, 500)))
+    # cv2.imshow('resized sud', cv2.resize(edited_frame, (400, 400)))
     cv2.waitKey(0)
 
 
