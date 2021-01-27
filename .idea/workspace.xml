@@ -225,7 +225,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611420958663</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="sud_01 current workflow:&#10;image -&gt; gray -&gt; bilateral filter -&gt; canny edges -&gt; find contours on it -(-)&gt; cancel HoughLinesP +&gt;  take the biggest contour and find the sub figure containing sudoku -&gt; warp image -&gt; get numbers -&gt; put them in a box to train &#10;&#10;train_difit_model &#10;is generating an mnist recognition model. hopefully able to recognize printed numbers&#10;&#10;added a basic decision model">
+      <created>1611771299309</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1611771299309</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

@@ -71,13 +71,13 @@ def find_num(img, filtered_img):
         if (0.05 * width <= w <= 0.95 * width) and (0.3 * height <= h <= 0.8 * height):
             # cropped_image = img[y:y + h, x:x + w]  # Create new image
             max_dim = max([w, h])
-            ratio = (5 / 4)
+            ratio = (4 / 3)
             x_left = max(0, math.ceil(cX - ratio * max_dim // 2))
             x_right = min(width, math.floor(cX + ratio * max_dim // 2))
             y_up = max(0, math.ceil(cY - ratio * max_dim // 2))
             y_down = min(width, math.floor(cY + ratio * max_dim // 2))
 
-            cropped_image = img[x_left:x_right, y_up:y_down]
+            cropped_image = img[y_up: y_down, x_left: x_right]
             correct_size = cv2.resize(cropped_image, (28, 28))
             cropped_image = cv2.drawContours(cropped_image, cntr, 0, (0, 255, 0), 1)
             cv2.imshow('cropped image', cropped_image)
