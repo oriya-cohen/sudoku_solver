@@ -276,10 +276,6 @@ def boxed_frame(big_img, size_sub_window_0to1):
     sq_marked_img = big_img
     sq_marked_img = cv2.rectangle(sq_marked_img, points[0], points[2], (200, 50, 200), line_width)
 
-    # drew that way but there is a shelf code for it
-    # for k in range(len(points)):
-    #     sq_marked_img = cv2.line(sq_marked_img, points[k - 1], points[k], (255, 0, 0), line_width)
-
     sub_img = big_img[points[0][1]:points[2][1],
               points[0][0]:points[2][0]]  # sub_img = img[y(pt1):y(pt3), x(pt1):x(pt3)]
 
@@ -306,8 +302,8 @@ def find_sud_in_frame(frame_to_edit):
         cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
 
     # show contours
-    # frame_edges = cv2.drawContours(frame_edges, contours, -1, (255, 255, 255), 6)
-    # cv2.imshow('frame_edges', frame_edges)
+    frame_edges = cv2.drawContours(frame_edges, contours, -1, (255, 0, 0), 2)
+    cv2.imshow('frame_edges', cv2.resize(frame_edges, (800, 800)))
 
     # sort contours by area - this part is based on :
     #           https://github.com/AjayAndData/Licence-plate-detection-and-recognition---using-openCV-only
