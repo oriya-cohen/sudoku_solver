@@ -4,6 +4,7 @@ import numpy as np
 import math
 import torch
 from pytorch_mnist import mnist
+import pytorch_ocr
 import load5example as exm
 
 
@@ -368,8 +369,11 @@ def find_sud_in_frame(frame_to_edit):
 if __name__ == '__main__':
 
     # load model
-    model = mnist.Net()
-    checkpoint_fpath = "pytorch_mnist/mnist_cnn.pt"
+    # model = mnist.Net()
+    model = pytorch_ocr.Net()
+    # checkpoint_fpath = "pytorch_mnist/mnist_cnn.pt"
+    checkpoint_fpath = "ocr_google_fonts_cnn.pt"
+
     model = load_model(checkpoint_fpath, model)
 
     # load demi picture
