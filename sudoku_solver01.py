@@ -3,7 +3,6 @@ import cv2
 import numpy as np
 import math
 import torch
-from pytorch_mnist import mnist
 import pytorch_ocr
 import load5example as exm
 
@@ -39,7 +38,7 @@ def predict_num(img):
     x_vec_tensor = torch.from_numpy(x_vec)
     output = model(x_vec_tensor)
     predict = output.argmax(dim=1, keepdim=True)[0][0]
-    print(predict)
+    # print(predict)
 
     # trying to find output by pytesseract didn't work
     # if (np.max(output) >= 0.6):
@@ -48,17 +47,31 @@ def predict_num(img):
     #     predict = np.argmax(num_predict) + 1
     #     predict = text
     #     cv2.imshow('number ' + str(predict), img)
-    return predict.numpy().tolist()
+    result = predict.numpy().tolist()
+    if output.max().detach().numpy().tolist() > -.1:
+        return result
+    else:
+        return -1    # probably not a number
 
 
 def find_num(img, filtered_img):
+
     predicted_num = -1
+    height, width = img.shape
+    # img = img[1 * height // 20:  19 * height//20, 1 * width//20: 19 * width//20]
+    # filtered_img = filtered_img[1 * height // 20:  19 * height//20, 1 * width//20: 19 * width//20]
+
+    cv2.imshow('cut img 2', img)
+    cv2.waitKey(1)
+
     height, width = img.shape
 
     num_edges = cv2.Canny(filtered_img, 50, 80)  # edges
     _, thresh = cv2.threshold(num_edges, 127, 255, 0)
     contours, hierarchy = \
-        cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
+        cv2.findContours(thresh, cv2.cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:max(5, len(contours))]  # sort by area
+
     for cntr in contours:
         x, y, w, h = cv2.boundingRect(cntr)  # This will find out co-ord for plate
         (cX, cY) = x + w // 2, y + h // 2
@@ -67,7 +80,7 @@ def find_num(img, filtered_img):
         # if cX == -1 or cY == -1:
         #     break
 
-        if (0.05 * width <= w <= 0.95 * width) and (0.3 * height <= h <= 0.8 * height):
+        if (0.05 * width <= w <= 0.7 * width) and (0.3 * height <= h <= 0.8 * height):
             # cropped_image = img[y:y + h, x:x + w]  # Create new image
             max_dim = max([w, h])
             ratio = (4 / 3)
@@ -80,19 +93,7 @@ def find_num(img, filtered_img):
             correct_size = cv2.resize(cropped_image, (28, 28))
             cropped_image = cv2.drawContours(cropped_image, cntr, 0, (0, 255, 0), 1)
             cv2.imshow('cropped image', cropped_image)
-            cv2.waitKey(40)
-
-
-            # d = 28  # dimension of training data size
-            # if cropped_image.shape[1] < d and cropped_image.shape[0] < d:
-            #     correct_size = np.zeros((d, d))
-            #     correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] = \
-            #         cv2.threshold(cropped_image, 100, 225, cv2.THRESH_BINARY_INV)[1]
-            #     # correct_size[d // 2 - h // 2: d // 2 - h // 2 + h, d // 2 - w // 2: d // 2 - w // 2 + w] = \
-            #     #     cv2.bitwise_not(cropped_image)
-            #     predicted_num = predict_num(correct_size)
-            # else:
-            #     correct_size = cv2.resize(cropped_image, (28, 28))
+            cv2.waitKey(1)
 
             predicted_num = predict_num(correct_size)
             break
@@ -117,14 +118,18 @@ def get_numbers_in_fig(aligned_gray, aligned_cleared, size=9):
     for c in range(size):
         for r in range(size):
             sud_array_filter[r][c] = aligned_cleared[x_mini * r: x_mini * (r + 1), y_mini * c: y_mini * (c + 1)]
-            sud_array[r][c] = aligned_gray[x_mini * r: x_mini * (r + 1), y_mini * c: y_mini * (c + 1)]
+            sud_array[r][c]        = aligned_gray   [x_mini * r: x_mini * (r + 1), y_mini * c: y_mini * (c + 1)]
+
+            cv2.imshow('cut img 1', sud_array[r][c])
+            cv2.waitKey(1)
+
             sud_array[r][c] = find_num(sud_array[r][c], sud_array_filter[r][c])
+            # cv2.destroyAllWindows()
 
             # test
-
-            if type(sud_array[r][c]) == 'numpy.int64':
-                cv2.imshow('is it a number?', sud_array[r][c])
-                cv2.waitKey(500)
+            # if type(sud_array[r][c]) == 'int':
+            #     cv2.imshow('is it a number?', sud_array[r][c])
+            #     cv2.waitKey(500)
 
     return sud_array
 
@@ -248,7 +253,7 @@ def clear_image_spots(frame_to_clear):
 
     # third try
     cleared_img = cv2.bilateralFilter(frame_to_clear, 10, 20, 20)  # apply bilateral filter
-
+    # cv2.imshow('bilateralFilter', cleared_img)
     # forth try
     # kernel = np.ones((2, 2), np.uint8)
     # cleared_img = cv2.adaptiveThreshold(frame_to_clear, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
@@ -291,7 +296,8 @@ def find_sud_in_frame(frame_to_edit):
     # (thresh, frame_to_edit) = cv2.threshold(frame_to_edit, 127, 255, cv2.THRESH_BINARY)   # black and white img
 
     spots_cleared_frame = clear_image_spots(gray)  # clear image spots
-    cv2.imshow('cleared_frame', cv2.resize(spots_cleared_frame, (300, 300)))
+    cv2.imshow('cleared_frame', cv2.resize(spots_cleared_frame, (300, 300)))  # show it out of run
+    cv2.imshow('cleared_frame', spots_cleared_frame)  # show it out of run
     # find edges
     frame_edges = cv2.Canny(spots_cleared_frame, 50, 80)
     # cv2.imshow('frame_edges', frame_edges)
@@ -299,17 +305,22 @@ def find_sud_in_frame(frame_to_edit):
     # find contours
     ret, thresh = cv2.threshold(frame_edges, 127, 255, 0)
     # contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # contours, hierarchy = cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) # only the external contour
     contours, hierarchy = \
-        cv2.findContours(thresh, cv2.cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # only the external contour
-
-    # show contours
-    frame_edges = cv2.drawContours(frame_edges, contours, -1, (255, 0, 0), 2)
-    cv2.imshow('frame_edges', cv2.resize(frame_edges, (800, 800)))
+        cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     # sort contours by area - this part is based on :
     #           https://github.com/AjayAndData/Licence-plate-detection-and-recognition---using-openCV-only
     #           /blob/master/Car%20Number%20Plate%20Detection.py
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:max(5, len(contours))]
+
+    # show contours
+    # gray_c = np.copy(gray)
+    # gray_c = cv2.drawContours(gray_c, contours, -1, (255, 0, 0), 2)
+    # cv2.imshow('frame_edges', cv2.resize(gray_c, (300, 300)))
+    # cv2.waitKey(1)
+
+
 
     # we need the maximal squared area
     idx = 1
@@ -366,6 +377,72 @@ def find_sud_in_frame(frame_to_edit):
     return frame_to_edit, soduko_arr
 
 
+class sud_puzzle():  # backtracking
+    def __init__(self, sud_arr):
+        self.sud_arr = sud_arr
+        self.sol_list = []
+
+    def is_leagal_sud(self):
+        for row in range(9):
+            for col in range(9):
+                if self.sud_arr[row][col] > 0:
+                    self.sud_arr[row][col] *= -1
+                    if self.possible(col, row, self.sud_arr[row][col] * -1):
+                        self.sud_arr[row][col] *= -1
+                    else:
+                        return False
+        return True
+
+    def possible(self, x, y, n):
+        for row in range(9):
+            if self.sud_arr[row][x] == n:
+                return False
+        for col in range(9):
+            if self.sud_arr[y][col] == n:
+                return False
+        sub_square = [x // 3, y // 3]
+        for col in range(3 * sub_square[0], 3 * sub_square[0] + 3):
+            for row in range(3 * sub_square[1], 3 * sub_square[1] + 3):
+                if self.sud_arr[row][col] == n:
+                    return False
+        return True
+
+    def get_solution(self):
+        for y in range(9):
+            for x in range(9):
+                if self.sud_arr[y][x] == -1:
+                    for n in range(1, 10):
+                        if self.possible(x, y, n):
+                            self.sud_arr[y][x] = n
+                            self.get_solution()
+                            # if all(self.sud_arr >= 0):
+                            #     return self.sud_arr
+                            self.sud_arr[y][x] = -1
+                    return
+        self.sol_list.append(np.copy(self.sud_arr))
+
+
+def image_print_sol(img):
+    # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # cv2.imshow('demo', gray)
+    # cv2.waitKey(1)
+    sub_frame = image
+    edited_frame, sud_arr = find_sud_in_frame(sub_frame)
+    cv2.imshow('demo', edited_frame)
+    cv2.waitKey(1)
+    sud_arr = np.array(sud_arr)
+    print("\nthe sudoku array before solving the sudoku: \n")
+    print(sud_arr)
+
+    sud_solver = sud_puzzle(sud_arr)  # create a solver
+    if sud_solver.is_leagal_sud():
+        sud_solver.get_solution()  # solve sud
+        sud_sol = sud_solver.sol_list  # get the solutions
+        print("\nthe sudoku array after solving the sudoku: \n")
+        print(sud_sol)
+    else:
+        print('impossible sudoku grid - try better image')
+
 if __name__ == '__main__':
 
     # load model
@@ -377,30 +454,29 @@ if __name__ == '__main__':
     model = load_model(checkpoint_fpath, model)
 
     # load demi picture
-    image_path = "pics/img_003.jpg"
+    # image_path = "pics/img_003.jpg"   # checked ok
+    # image_path = "pics/img_004.1.jpg"   # checked ok
+    # image_path = "pics/img_006.1.jpg"   # checked ok
+    image_path = "pics/img_010.1.jpg"    # checked ok
+    # image_path = "pics/img_011.1.jpg"  # checked ok
     image = cv2.imread(image_path)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # cv2.imshow('demo', gray)
-    # cv2.waitKey(1)
-    sub_frame = image
-    edited_frame, sud_arr = find_sud_in_frame(sub_frame)
-    print(np.array(sud_arr))
-    # cv2.imshow('resized sud', cv2.resize(edited_frame, (400, 400)))
-    cv2.waitKey(0)
+    image_print_sol(image)
 
 
     # display cam-feed
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    while True:
-        ret, frame = cap.read()
-        if not ret or cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        range_sub_rect = 9 / 10
-        frame_box, sub_frame = boxed_frame(frame, range_sub_rect)
-        cv2.imshow('feed', frame_box)
-
-        edited_frame, sud_arr = find_sud_in_frame(sub_frame)
-        # cv2.imshow('edited_frame', edited_frame)
-
-    cap.release()  # release the camera
+    # cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    # while True:
+    #     ret, frame = cap.read()
+    #     if not ret or cv2.waitKey(1) & 0xFF == ord('q'):
+    #         break
+    #     range_sub_rect = 9 / 10
+    #     frame_box, sub_frame = boxed_frame(frame, range_sub_rect)
+    #     cv2.imshow('feed', frame_box)
+    #
+    #     edited_frame, sud_arr = find_sud_in_frame(sub_frame)
+    #     if np.any(sud_arr != 0):
+    #         print(np.array(sud_arr))
+    #     cv2.imshow('edited_frame', edited_frame)
+    #
+    # cap.release()  # release the camera
     cv2.destroyAllWindows()  # closes the current windows
