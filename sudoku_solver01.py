@@ -40,6 +40,12 @@ def predict_num(img):
     predict = output.argmax(dim=1, keepdim=True)[0][0]
     # print(predict)
 
+    outputlist = output.detach().numpy().tolist()[0]
+    # std_output = np.std(outputlist)
+    mean_output = np.mean(outputlist)
+    max_output = output.max().detach().numpy().tolist()
+    # distinguished = max_output > mean_output + std_output
+    min_max_ratio = np.abs(mean_output / max_output)
     # trying to find output by pytesseract didn't work
     # if (np.max(output) >= 0.6):
     #     text = pytesseract.image_to_string(img, lang='eng')
@@ -48,7 +54,7 @@ def predict_num(img):
     #     predict = text
     #     cv2.imshow('number ' + str(predict), img)
     result = predict.numpy().tolist()
-    if output.max().detach().numpy().tolist() > -.1:
+    if min_max_ratio > 500:  #output.max().detach().numpy().tolist() > -.1:
         return result
     else:
         return -1    # probably not a number
@@ -296,8 +302,9 @@ def find_sud_in_frame(frame_to_edit):
     # (thresh, frame_to_edit) = cv2.threshold(frame_to_edit, 127, 255, cv2.THRESH_BINARY)   # black and white img
 
     spots_cleared_frame = clear_image_spots(gray)  # clear image spots
-    cv2.imshow('cleared_frame', cv2.resize(spots_cleared_frame, (300, 300)))  # show it out of run
-    cv2.imshow('cleared_frame', spots_cleared_frame)  # show it out of run
+    # cv2.imshow('cleared_frame', cv2.resize(spots_cleared_frame, (150, 150)))  # show it out of run
+    # cv2.imshow('cleared_frame', spots_cleared_frame)  # show it out of run
+
     # find edges
     frame_edges = cv2.Canny(spots_cleared_frame, 50, 80)
     # cv2.imshow('frame_edges', frame_edges)
@@ -320,8 +327,6 @@ def find_sud_in_frame(frame_to_edit):
     # cv2.imshow('frame_edges', cv2.resize(gray_c, (300, 300)))
     # cv2.waitKey(1)
 
-
-
     # we need the maximal squared area
     idx = 1
     for cntr in contours:
@@ -336,10 +341,6 @@ def find_sud_in_frame(frame_to_edit):
         if len(approx) == 4 and cv2.contourArea(cntr) > 0.5 * np.size(gray):  # Select the contour with 4 corners
             NumberPlateCnt = approx  # This is our approx Number Plate Contour
 
-            # Crop those contours and store it in Cropped Images folder
-            # x, y, w, h = cv2.boundingRect(cntr)  # This will find out co-ord for plate
-            # new_img = gray[y:y + h, x:x + w]  # Create new image
-
             # my edition. stretching a Quadrilateral to square and get the transverse transform
             aligned_gray_img, transverse_trans = \
                 four_point_transform(gray, pts=[approx[i][0] for i in range(4)])  # cleared image
@@ -347,7 +348,7 @@ def find_sud_in_frame(frame_to_edit):
             aligned_cleared_img, _ = \
                 four_point_transform(spots_cleared_frame, pts=[approx[i][0] for i in range(4)])
 
-            cv2.imshow('sud_aligned', cv2.resize(aligned_gray_img, (400, 400)))
+            cv2.imshow('sud_aligned', cv2.resize(aligned_gray_img, (200, 200)))
 
             if np.size(aligned_gray_img) > 0.5 * np.size(gray):  # only for large figures display them
                 # cv2.imshow('Cropped Images /' + str(idx) + '.png', aligned_gray_img)  # display new image
@@ -382,7 +383,9 @@ class sud_puzzle():  # backtracking
         self.sud_arr = sud_arr
         self.sol_list = []
 
+
     def is_leagal_sud(self):
+        self.multiple_answers = False
         for row in range(9):
             for col in range(9):
                 if self.sud_arr[row][col] > 0:
@@ -414,30 +417,29 @@ class sud_puzzle():  # backtracking
                     for n in range(1, 10):
                         if self.possible(x, y, n):
                             self.sud_arr[y][x] = n
-                            self.get_solution()
-                            # if all(self.sud_arr >= 0):
-                            #     return self.sud_arr
+                            if not self.multiple_answers:
+                                self.get_solution()
                             self.sud_arr[y][x] = -1
                     return
-        self.sol_list.append(np.copy(self.sud_arr))
+        if not self.sol_list or self.sol_list[0] != 'bad input':
+            self.sol_list.append(np.copy(self.sud_arr))
+        else:
+            self.sol_list[0] = 'bad input'
+            self.multiple_answers = True
 
-
-def image_print_sol(img):
-    # gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # cv2.imshow('demo', gray)
-    # cv2.waitKey(1)
-    sub_frame = image
-    edited_frame, sud_arr = find_sud_in_frame(sub_frame)
-    cv2.imshow('demo', edited_frame)
-    cv2.waitKey(1)
+def image_print_sol(image):
+    edited_frame, sud_arr = find_sud_in_frame(image)
     sud_arr = np.array(sud_arr)
+    if not np.array(sud_arr).any():   # array empty
+        return
+
     print("\nthe sudoku array before solving the sudoku: \n")
     print(sud_arr)
 
-    sud_solver = sud_puzzle(sud_arr)  # create a solver
+    sud_solver = sud_puzzle(sud_arr)    # create a solver
     if sud_solver.is_leagal_sud():
-        sud_solver.get_solution()  # solve sud
-        sud_sol = sud_solver.sol_list  # get the solutions
+        sud_solver.get_solution()       # solve sud
+        sud_sol = sud_solver.sol_list   # get the solutions
         print("\nthe sudoku array after solving the sudoku: \n")
         print(sud_sol)
     else:
@@ -454,29 +456,30 @@ if __name__ == '__main__':
     model = load_model(checkpoint_fpath, model)
 
     # load demi picture
-    # image_path = "pics/img_003.jpg"   # checked ok
-    # image_path = "pics/img_004.1.jpg"   # checked ok
-    # image_path = "pics/img_006.1.jpg"   # checked ok
-    image_path = "pics/img_010.1.jpg"    # checked ok
-    # image_path = "pics/img_011.1.jpg"  # checked ok
-    image = cv2.imread(image_path)
-    image_print_sol(image)
+    img_path_list = ["pics/img_003.jpg",
+                     "pics/img_004.1.jpg",
+                     "pics/img_006.1.jpg",
+                     "pics/img_010.1.jpg",
+                     "pics/img_011.1.jpg"]
+
+    for img_path in img_path_list:
+        image = cv2.imread(img_path)
+        image_print_sol(image)
 
 
     # display cam-feed
-    # cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    # while True:
-    #     ret, frame = cap.read()
-    #     if not ret or cv2.waitKey(1) & 0xFF == ord('q'):
-    #         break
-    #     range_sub_rect = 9 / 10
-    #     frame_box, sub_frame = boxed_frame(frame, range_sub_rect)
-    #     cv2.imshow('feed', frame_box)
-    #
-    #     edited_frame, sud_arr = find_sud_in_frame(sub_frame)
-    #     if np.any(sud_arr != 0):
-    #         print(np.array(sud_arr))
-    #     cv2.imshow('edited_frame', edited_frame)
-    #
-    # cap.release()  # release the camera
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    while True:
+        ret, frame = cap.read()
+        if not ret or cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        range_sub_rect = 9 / 10
+        frame_box, sub_frame = boxed_frame(frame, range_sub_rect)
+        cv2.imshow('feed', frame_box)
+
+        edited_frame, sud_arr = find_sud_in_frame(sub_frame)
+        image_print_sol(edited_frame)
+        cv2.imshow('edited_frame', edited_frame)
+
+    cap.release()  # release the camera
     cv2.destroyAllWindows()  # closes the current windows

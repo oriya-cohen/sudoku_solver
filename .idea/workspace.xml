@@ -281,7 +281,14 @@
       <option name="project" value="LOCAL" />
       <updated>1615375293345</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="added threshold -0.1 to orediction max.&#10;fixed a bug of false positives">
+      <created>1615754251122</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1615754251122</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -306,14 +313,15 @@
     <MESSAGE value="added a test without video.&#10;got rid of access functions and comments" />
     <MESSAGE value="centering round letter corrected" />
     <MESSAGE value="1.ocr based on google fonts&#10;2.model not mixing 1,7" />
-    <option name="LAST_COMMIT_MESSAGE" value="1.ocr based on google fonts&#10;2.model not mixing 1,7" />
+    <MESSAGE value="added threshold -0.1 to orediction max.&#10;fixed a bug of false positives" />
+    <option name="LAST_COMMIT_MESSAGE" value="added threshold -0.1 to orediction max.&#10;fixed a bug of false positives" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>257</line>
+          <line>263</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -363,23 +371,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>481</line>
-          <option name="timeStamp" value="164" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>358</line>
-          <option name="timeStamp" value="214" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>53</line>
-          <option name="timeStamp" value="225" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sudoku_solver01.py</url>
-          <line>51</line>
-          <option name="timeStamp" value="226" />
+          <line>470</line>
+          <option name="timeStamp" value="235" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
