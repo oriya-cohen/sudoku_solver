@@ -5,4 +5,4 @@ in this repo i'm learning github while using it to make a python based soduko-so
  * the current working file is sudoku_solver01.py
  - it gets an image 
  - recognizes that sudoku numbers
- - than it solves and print the solution aquired by backtracking
+ - than it solves and print the solution acquired by backtracking
