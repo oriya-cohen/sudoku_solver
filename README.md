@@ -1,6 +1,6 @@
 # sudoku-solver
 
-in this repo i'm learning github while using it to make a python based soduko-solver
+in this repo i'm using python to make a soduko-solver
 
  * the current working file is sudoku_solver01.py
  - it gets an image 
