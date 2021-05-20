@@ -1,5 +1,8 @@
 # sudoku-solver
 
-in this repo im learning github and using it to make a python based soduko-solver
+in this repo i'm using python to make a soduko-solver
 
- * (this is an edit)
+ * the current working file is sudoku_solver01.py
+ - it gets an image 
+ - recognizes that sudoku numbers
+ - than it solves and print the solution acquired by backtracking
