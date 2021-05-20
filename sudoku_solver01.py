@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import math
 import torch
-import pytorch_ocr
+import pytorch_net
 import load5example as exm
 
 
@@ -285,7 +285,7 @@ def boxed_frame(big_img, size_sub_window_0to1):
 
     # plot ROI on image
     line_width = 5
-    sq_marked_img = big_img
+    sq_marked_img = big_img.copy()
     sq_marked_img = cv2.rectangle(sq_marked_img, points[0], points[2], (200, 50, 200), line_width)
 
     sub_img = big_img[points[0][1]:points[2][1],
@@ -421,11 +421,14 @@ class sud_puzzle():  # backtracking
                                 self.get_solution()
                             self.sud_arr[y][x] = -1
                     return
+        if len(self.sol_list) > 1:
+            self.sol_list = []
+            self.sol_list.append('bad input')
+            self.multiple_answers = True
+
         if not self.sol_list or self.sol_list[0] != 'bad input':
             self.sol_list.append(np.copy(self.sud_arr))
-        else:
-            self.sol_list[0] = 'bad input'
-            self.multiple_answers = True
+
 
 def image_print_sol(image):
     edited_frame, sud_arr = find_sud_in_frame(image)
@@ -449,9 +452,10 @@ if __name__ == '__main__':
 
     # load model
     # model = mnist.Net()
-    model = pytorch_ocr.Net()
     # checkpoint_fpath = "pytorch_mnist/mnist_cnn.pt"
-    checkpoint_fpath = "ocr_google_fonts_cnn.pt"
+
+    model = pytorch_net.Net()   # -------------------------- not OCR change name -------------------------------
+    checkpoint_fpath = "google_fonts_cnn.pt"   # -------------------------- not OCR change name -------------
 
     model = load_model(checkpoint_fpath, model)
 
@@ -468,18 +472,18 @@ if __name__ == '__main__':
 
 
     # display cam-feed
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    while True:
-        ret, frame = cap.read()
-        if not ret or cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        range_sub_rect = 9 / 10
-        frame_box, sub_frame = boxed_frame(frame, range_sub_rect)
-        cv2.imshow('feed', frame_box)
-
-        edited_frame, sud_arr = find_sud_in_frame(sub_frame)
-        image_print_sol(edited_frame)
-        cv2.imshow('edited_frame', edited_frame)
-
-    cap.release()  # release the camera
+    # cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    # while True:
+    #     ret, frame = cap.read()
+    #     if not ret or cv2.waitKey(1) & 0xFF == ord('q'):
+    #         break
+    #     range_sub_rect = 9 / 10
+    #     frame_box, sub_frame = boxed_frame(frame, range_sub_rect)
+    #     cv2.imshow('feed', frame_box)
+    #
+    #     edited_frame, sud_arr = find_sud_in_frame(sub_frame)
+    #     image_print_sol(edited_frame)
+    #     cv2.imshow('edited_frame', edited_frame)
+    #
+    # cap.release()  # release the camera
     cv2.destroyAllWindows()  # closes the current windows
