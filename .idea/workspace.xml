@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7fdfba85-de13-4b18-94e9-6e9ee520c4c7" name="Default Changelist" comment="1.ocr based on google fonts&#10;2.model not mixing 1,7">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ocr_google_fonts_cnn.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch_mnist/mnist.py" beforeDir="false" afterPath="$PROJECT_DIR$/pytorch_mnist/mnist.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch_ocr.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sudoku_solver01.py" beforeDir="false" afterPath="$PROJECT_DIR$/sudoku_solver01.py" afterDir="false" />
-    </list>
+    <list default="true" id="7fdfba85-de13-4b18-94e9-6e9ee520c4c7" name="Default Changelist" comment="1.added the mnist_model" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -301,7 +294,14 @@
       <option name="project" value="LOCAL" />
       <updated>1616148546307</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="1.added the mnist_model">
+      <created>1621505681483</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1621505681483</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -328,7 +328,8 @@
     <MESSAGE value="1.ocr based on google fonts&#10;2.model not mixing 1,7" />
     <MESSAGE value="added threshold -0.1 to orediction max.&#10;fixed a bug of false positives" />
     <MESSAGE value="all tests are working" />
-    <option name="LAST_COMMIT_MESSAGE" value="all tests are working" />
+    <MESSAGE value="1.added the mnist_model" />
+    <option name="LAST_COMMIT_MESSAGE" value="1.added the mnist_model" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
